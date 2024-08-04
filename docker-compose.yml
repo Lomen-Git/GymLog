@@ -1,0 +1,61 @@
+services:
+  # Frontend
+  front:
+    image: gymlog-front
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # Heijastetaan blog-front kansion muutokset konttiin (kehitys lokaalisti)
+    volumes:
+      - ./frontend:/usr/src/app
+      #- /usr/src/app/node_modules production modessa ongelmia npm ci??
+    # Ports pois kun laitetaan reverse proxy
+    #ports:
+     # - 5173:5173
+    container_name: gymlog-front
+
+  # debug-helper busybox
+
+  # Tietokanta
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "666:5432"
+    container_name: gymLog-db
+    #volumes:
+      #- ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # Server  
+  server:
+    image: gymlog-back
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    #ports:
+      # Käytetään vain reverse proxya
+      #- 3001:3001
+    container_name: gymlog-back-dev
+    environment: 
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: production
+    depends_on:
+      - db
+
+  # Reverse proxy
+  nginx:
+    image: nginx:1.20.1
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    container_name: reverse-proxy
+    depends_on:
+      - server
