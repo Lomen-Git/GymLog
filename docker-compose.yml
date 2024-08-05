@@ -6,8 +6,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     # Heijastetaan blog-front kansion muutokset konttiin (kehitys lokaalisti)
-    volumes:
-      - ./frontend:/usr/src/app
+    #volumes:
+      #- ./frontend:/usr/src/app
       #- /usr/src/app/node_modules production modessa ongelmia npm ci??
     # Ports pois kun laitetaan reverse proxy
     #ports:
@@ -36,9 +36,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    volumes:
-      - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
+    #volumes:
+      #- ./backend:/usr/src/app
+      #- /usr/src/app/node_modules
     #ports:
       # Käytetään vain reverse proxya
       #- 3001:3001

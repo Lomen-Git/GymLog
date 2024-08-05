@@ -1,40 +1,46 @@
-import { useState } from "react"
+import PropTypes from 'prop-types'
 
-const LoginForm = ({ onLogin }) => {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    onLogin(username, password)
-  }
+const LoginForm = ({
+  handleSubmit,
+  handleUsernameChange,
+  handlePasswordChange,
+  username,
+  password
+}) => {
 
   return (
     <div className="loginContainer">
       <h2>Kirjaudu sisään!</h2>
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="username">Käyttäjänimi:</label>
-        <input
-          type="text"
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="password">Salasana:</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-      <button type="submit">Kirjaudu</button>
-    </form>
+
+      <form onSubmit={handleSubmit}>
+        <div>
+          Käyttäjänimi
+          <input
+            id='username'
+            value={username}
+            onChange={handleUsernameChange}
+          />
+        </div>
+        <div>
+          Salasana
+          <input
+            id='password'
+            value={password}
+            onChange={handlePasswordChange}
+          />
+        </div>
+        <button id='login-button' type="submit">Kirjaudu</button>
+      </form>
     </div>
   )
+}
+
+LoginForm.propTypes = {
+  handleSubmit: PropTypes.func.isRequired,
+  handleUsernameChange: PropTypes.func.isRequired,
+  handlePasswordChange: PropTypes.func.isRequired,
+  username: PropTypes.string.isRequired,
+  password: PropTypes.string.isRequired
 }
 
 export default LoginForm

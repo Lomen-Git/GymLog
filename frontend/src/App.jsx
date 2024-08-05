@@ -9,19 +9,10 @@ import axios from "axios"
 import LoginForm from './components/auth/LoginForm'
 import Mermaid from './components/Mermaid'
 import Navbar from './components/Navbar'
+import loginService from './services/login'
+import logsService from './services/logs'
 //import './App.css'
 
-const api = axios.create({
-  baseURL: `/api/login`,
-})
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token")
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`
-  }
-  return config
-})
 
 const PrivateRoute = ({ children, isAuthenticated }) => {
   return isAuthenticated ? children : <Navigate to="/login" />
@@ -31,27 +22,35 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+
 
   useEffect(() => {
-    const loggedUserJSON = localStorage.getItem("loggedUser")
-    if (loggedUserJSON) {
+    const loggedUserJSON = window.localStorage.getItem('loggedUser')
+    if (loggedUserJSON !== null && loggedUserJSON !== 'null') {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
-      setIsAuthenticated(true)
-      api.defaults.headers.common["Authorization"] = `Bearer ${user.token}`
+      logsService.setToken(user.token)
     }
   }, [])
 
-  const handleLogin = async (username, password) => {
+  const handleLogin = async (event) => {
+    event.preventDefault()
     try {
-      const response = await api.post("/login", { username, password })
-      const user = response.data
-      localStorage.setItem("loggedUser", JSON.stringify(user))
-      api.defaults.headers.common["Authorization"] = `Bearer ${user.token}`
-      setUser(user)
+      const credentials = { username, password }
+      const user = await loginService.login(credentials)
+
+      window.localStorage.setItem(
+        'loggedUser', JSON.stringify(user)
+      )
+      logsService.setToken(user.token)
       setIsAuthenticated(true)
-    } catch (error) {
-      setErrorMessage("Väärä käyttäjänimi tai salasana")
+      setUser(user)
+      setUsername('')
+      setPassword('')
+    } catch (exception) {
+      setErrorMessage('Kirjautuminen epäonnistui')
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
@@ -61,8 +60,9 @@ const App = () => {
   const handleLogout = () => {
     setUser(null)
     setIsAuthenticated(false)
-    localStorage.removeItem("loggedUser")
-    delete api.defaults.headers.common["Authorization"]
+    window.localStorage.setItem(
+      'loggedUser', null
+    )
   }
 
   return (
@@ -75,7 +75,13 @@ const App = () => {
           <Route path="/login" element={isAuthenticated ? (
                 <Navigate to="/" />
               ) : (
-                <LoginForm onLogin={handleLogin} />
+                <LoginForm
+                  username={username}
+                  password={password}
+                  handlePasswordChange={({ target }) => setPassword(target.value)}
+                  handleUsernameChange={({ target }) => setUsername(target.value)}
+                  handleSubmit={handleLogin}
+                />
               )
             }
           />

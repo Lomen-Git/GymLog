@@ -6,7 +6,7 @@ const Navbar = ({ user, handleLogout }) => {
     <header>
       <nav>
         <span>Tervetuloa, {user?.username}!</span>
-        <button onClick={handleLogout}>Kirjaudu ulos</button>
+        <button onClick={ handleLogout }>Kirjaudu ulos</button>
       </nav>
     </header>
     </div>
