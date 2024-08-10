@@ -22,5 +22,5 @@ COPY ./vite.config.js ./vite.config.js
 
 
 # npm run dev käynnistää soveluksen development tilassa
-# extra viivat -- --host tarvitaan että server on näkyvissä konti ulkopuolella
+# extra viivat -- --host tarvitaan että server on näkyvissä kontin ulkopuolella
 CMD ["npm", "run", "dev", "--", "--host"]

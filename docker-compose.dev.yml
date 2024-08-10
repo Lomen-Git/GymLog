@@ -7,11 +7,13 @@ services:
       dockerfile: dev.Dockerfile
     # Heijastetaan blog-front kansion muutokset konttiin (kehitys lokaalisti)
     volumes:
-      - ./frontend:/usr/src/app
+      - type: bind
+        source: ./frontend
+        target: /usr/src/app
       - /usr/src/app/node_modules
     # Ports pois kun laitetaan reverse proxy
     #ports:
-     # - 5173:5173
+      #- 5173:5173
     container_name: gymlog-front-dev
 
   # debug-helper busybox

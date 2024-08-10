@@ -5,13 +5,13 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom"
-import axios from "axios"
+
 import LoginForm from './components/auth/LoginForm'
 import Mermaid from './components/Mermaid'
 import Navbar from './components/Navbar'
 import loginService from './services/login'
 import logsService from './services/logs'
-//import './App.css'
+import './App.css'
 
 
 const PrivateRoute = ({ children, isAuthenticated }) => {
@@ -70,7 +70,8 @@ const App = () => {
       <div>
         {isAuthenticated && <Navbar user={user} handleLogout={handleLogout} />}
         {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
-        <div className="content">
+      </div>
+      <div className="content">
         <Routes>
           <Route path="/login" element={isAuthenticated ? (
                 <Navigate to="/" />
@@ -96,7 +97,6 @@ const App = () => {
             }
           />
         </Routes>
-        </div>
       </div>
     </Router>
   )
