@@ -32,7 +32,7 @@ const LoginForm = ({
               onChange={handlePasswordChange}
             />
           </div>
-          <button id='login-button' type="submit">Kirjaudu</button>
+          <button className={styles.loginButton} id='login-button' type="submit">Kirjaudu</button>
         </form>
       </div>
     </div>

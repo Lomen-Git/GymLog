@@ -8,8 +8,29 @@
 }
 
 .loginForm {
-  background-color: #93570A;
-  padding: 30px;
+  background-color: #131212;
+  opacity: 90%;
+  padding: 60px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(112, 6, 6, 0.1);
+  color: #ffffff;
+  font-size: large;
+  font-weight: bold;
+}
+
+.loginButton {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background-color: #0f203d;
+  color: white;
+  text-align: center;
+  border: none;
+  border-radius: 3px;
+  font-size: 18px;
+  cursor: pointer;
+  margin-top: 15%;
+}
+
+.loginButton:hover {
+  background-color: #233149;
 }

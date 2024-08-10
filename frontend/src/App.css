@@ -1,4 +1,5 @@
 html, body, #root, .content {
+  font-family: monospace;
   height: 100%;
   margin: 0;
   padding: 0;

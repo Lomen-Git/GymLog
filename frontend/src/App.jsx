@@ -9,6 +9,7 @@ import {
 import LoginForm from './components/auth/LoginForm'
 import Mermaid from './components/Mermaid'
 import Navbar from './components/Navbar'
+import Footer from "./components/Footer"
 import loginService from './services/login'
 import logsService from './services/logs'
 import './App.css'
@@ -31,6 +32,7 @@ const App = () => {
     if (loggedUserJSON !== null && loggedUserJSON !== 'null') {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
+      setIsAuthenticated(true)
       logsService.setToken(user.token)
     }
   }, [])
@@ -40,7 +42,6 @@ const App = () => {
     try {
       const credentials = { username, password }
       const user = await loginService.login(credentials)
-
       window.localStorage.setItem(
         'loggedUser', JSON.stringify(user)
       )
@@ -98,6 +99,7 @@ const App = () => {
           />
         </Routes>
       </div>
+      <div><Footer /></div>
     </Router>
   )
 }
