@@ -9,7 +9,6 @@ const Footer = () => {
     '“Make it work, make it right, make it fast.” – Kent Beck',
     '"Don’t comment bad code – rewrite it" – Brian Kernighan',
     '"No one in the brief history of computing has ever written a piece of perfect software. It’s unlikely that you’ll be the first" – Andy Hunt',
-    '"Debugging becomes significantly easier if you first admit that you are the problem" – William Laeder',
     '"Any fool can write code that a computer can understand. Good programmers write code that humans can understand" – Martin Fowler',
     '“The only way to go fast, is to go well.” ― Robert C. Martin',
     '"Talk is cheap. Show me the code" – Linus Torvalds',

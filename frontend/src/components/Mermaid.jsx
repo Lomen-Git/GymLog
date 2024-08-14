@@ -3,20 +3,37 @@ import mermaid from 'mermaid'
 
 const Mermaid = () => {
   const [chart, setChart] = useState(`
-pie title PROJEKTIIN KÄYTETTY AIKA
-    "Googlaus" : 30
-    "LLM promptaus" : 10
-    "Debuggaus" : 37
-    "Tutoriaalit": 20
-    "Ohjelman kirjoittaminen" : 3
+erDiagram
+    users ||--|| sessions : has
+
+    users {
+      id INTEGER PK
+      username STRING
+      password_hash STRING
+      is_disabled BOOL
+    }
+    sessions {
+      id INTEGER PK
+      user_id INTEGER
+      is_disabled BOOL
+    }
+    
   `)
   const [code, setCode] = useState(`
-pie title PROJEKTIIN KÄYTETTY AIKA
-    "Googlaus" : 30
-    "LLM promptaus" : 10
-    "Debuggaus" : 37
-    "Tutoriaalit": 20
-    "Ohjelman kirjoittaminen" : 3
+erDiagram
+    users ||--|| sessions : has
+
+    users {
+      id INTEGER PK
+      username STRING
+      password_hash STRING
+      is_disabled BOOL
+    }
+    sessions {
+      id INTEGER PK
+      user_id INTEGER
+      is_disabled BOOL
+    }
   `)
   const mermaidRef = useRef(null)
 

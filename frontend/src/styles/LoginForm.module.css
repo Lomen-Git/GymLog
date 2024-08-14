@@ -34,3 +34,9 @@
 .loginButton:hover {
   background-color: #233149;
 }
+
+.errorMessage {
+  font-size: large;
+  color: crimson;
+  margin-bottom: 10%;
+}

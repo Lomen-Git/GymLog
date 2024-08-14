@@ -6,12 +6,14 @@ const LoginForm = ({
   handleUsernameChange,
   handlePasswordChange,
   username,
-  password
+  password,
+  errorMessage
 }) => {
 
   return (
     <div className={styles.loginContainer}>
       <div className={styles.loginForm}>
+        {errorMessage && <div className={styles.errorMessage}> {errorMessage} </div>}
         <form onSubmit={handleSubmit}>
           <div>
             Käyttäjänimi:

@@ -16,15 +16,19 @@ import './App.css'
 
 
 const PrivateRoute = ({ children, isAuthenticated }) => {
-  return isAuthenticated ? children : <Navigate to="/login" />
+  if (isAuthenticated) {
+    return children
+  } else {
+    return <Navigate to="/login" />
+  }
 }
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
 
   useEffect(() => {
@@ -46,12 +50,13 @@ const App = () => {
         'loggedUser', JSON.stringify(user)
       )
       logsService.setToken(user.token)
-      setIsAuthenticated(true)
       setUser(user)
+      setIsAuthenticated(true)
       setUsername('')
       setPassword('')
-    } catch (exception) {
-      setErrorMessage('Kirjautuminen epäonnistui')
+    } catch (error) {
+      const message = JSON.stringify(error.response.data.error)
+      setErrorMessage(message)
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
@@ -69,12 +74,11 @@ const App = () => {
   return (
     <Router>
       <div>
-        {isAuthenticated && <Navbar user={user} handleLogout={handleLogout} />}
-        {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
+        {user && <Navbar user={user} handleLogout={handleLogout} />}
       </div>
       <div className="content">
         <Routes>
-          <Route path="/login" element={isAuthenticated ? (
+          <Route path="/login" element={user ? (
                 <Navigate to="/" />
               ) : (
                 <LoginForm
@@ -83,6 +87,7 @@ const App = () => {
                   handlePasswordChange={({ target }) => setPassword(target.value)}
                   handleUsernameChange={({ target }) => setUsername(target.value)}
                   handleSubmit={handleLogin}
+                  errorMessage={errorMessage}
                 />
               )
             }
