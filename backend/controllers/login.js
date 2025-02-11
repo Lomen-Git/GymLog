@@ -1,8 +1,7 @@
 const jwt = require('jsonwebtoken')
 const router = require('express').Router()
-const Session = require('../models/session')
 const { SECRET } = require('../util/config')
-const User = require('../models/user')
+const { User, Session } = require('../models/zzz_index.js')
 const { verifyPassword } = require('../util/password')
 
 
@@ -39,7 +38,7 @@ router.post('/', async (request, response) => {
     SECRET
   )
 
-  response.status(200).send({ username: user.username, token: token })
+  response.status(200).send({ username: user.username, userId: user.id, token: token })
 })
 
 module.exports = router

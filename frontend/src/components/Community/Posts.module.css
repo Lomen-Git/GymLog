@@ -1,0 +1,111 @@
+.centeredContainer {
+  display: flex;
+  flex-direction: column; /* Järjestää elementit pystysuunnassa */
+  justify-content: center; /* Keskittää pystysuunnassa */
+  align-items: center; /* Keskittää vaakasuunnassa */
+  min-height: 100vh; /* Varmistaa, että koko näyttö täytetään */
+}
+
+
+.postContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  background-color: transparent; /* Valkoinen taustaväri */
+  border-radius: 12px; /* Pyöristetyt kulmat */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Pehmeä varjo */
+  border: 2px solid #e0e0e0; /* Hieman vaaleampi reuna */
+  max-width: 800px;
+  width: 100%;
+}
+
+.postHeader {
+  display: flex;
+  justify-content: space-between; /* Kirjoittaja ja päiväys eri laidoilla */
+  align-items: center;
+  margin-bottom: 1rem; /* Väli sisällön ja otsikon välillä */
+}
+
+.author {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: purple;
+}
+
+.timestamp {
+  font-size: 0.9rem;
+  color: #888; /* Vaaleanharmaa teksti */
+}
+
+.postContent {
+  font-size: 1.1rem;
+  line-height: 1.6; /* Lisää tilaa riveille, helpottaa lukemista */
+  color: #333; /* Tummanharmaa teksti */
+  margin-bottom: 1rem; /* Väli sisällön ja tykkäysten välillä */
+}
+
+.postFooter {
+  display: flex;
+  justify-content: space-between; /* Tykkäykset ja toimintonapit eri laidoilla */
+  align-items: center;
+}
+
+.likes {
+  font-size: 1rem;
+  color: #555; /* Neutraali harmaa */
+}
+
+.buttons {
+  display: flex;
+  gap: 0.5rem; /* Väli painikkeiden välillä */
+}
+
+.button {
+  background-color: #4caf50; /* Vihreä taustaväri */
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #45a049; /* Tummempi vihreä hoverilla */
+}
+
+.commentSection {
+  margin-top: 1.5rem; /* Väli kommenttien ja postauksen sisällön välillä */
+}
+
+.commentBox {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 10px;
+  background-color: grey;
+}
+
+.comment {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.comment:last-child {
+  border-bottom: none;
+}
+
+.commentAuthor {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.commentContent {
+  display: inline;
+  flex-grow: 1;
+}

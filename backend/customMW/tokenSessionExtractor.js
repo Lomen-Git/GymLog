@@ -1,4 +1,4 @@
-const { Session, User } = require('../models')
+const { Session, User } = require('../models/zzz_index')
 const jwt = require('jsonwebtoken')
 const { SECRET } = require('../util/config')
 
@@ -7,11 +7,11 @@ const tokenSessionExtractor = async (request, response, next) => {
   const authorization = request.get('authorization')
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
     try {
-        request.decodedToken = jwt.verify(authorization.substring(7), SECRET)
-      
+      const decoded = jwt.verify(authorization.substring(7), SECRET)
+
       const session = await Session.findOne({ 
         where: {
-            userId: decoded.id,
+            userId: decoded.userId,
         },
         include: [
           {

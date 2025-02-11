@@ -1,3 +1,7 @@
+networks:
+  gymlog-network:
+    driver: bridge
+
 services:
   # Frontend
   front:
@@ -13,6 +17,8 @@ services:
     #ports:
      # - 5173:5173
     container_name: gymlog-front
+    networks:
+      - gymlog_network
 
   # debug-helper busybox
 
@@ -27,12 +33,16 @@ services:
     ports:
       - "666:5432"
     container_name: gymLog-db
+    networks:
+      - gymlog_network
     #volumes:
       #- ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   # Server  
   server:
     image: gymlog-back
+    env_file:
+      - .env
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -48,6 +58,8 @@ services:
       NODE_ENV: production
     depends_on:
       - db
+    networks:
+      - gymlog_network
 
   # Reverse proxy
   nginx:
@@ -59,3 +71,5 @@ services:
     container_name: reverse-proxy
     depends_on:
       - server
+    networks:
+      - gymlog_network

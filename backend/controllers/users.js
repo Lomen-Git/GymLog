@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { User } = require('../models/index')
+const { User } = require('../models/zzz_index')
 const { hashPassword } = require('../util/password') // Salasanaan liittyviä apufunktioita
 
 

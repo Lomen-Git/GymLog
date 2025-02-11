@@ -14,3 +14,4 @@ npm install cors // salli pyynnöt muista osoitteista
 docker ps
 NAMES: container ...
 docker exec -it container psql -U root postgres
+

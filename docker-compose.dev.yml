@@ -35,6 +35,8 @@ services:
   # Server  
   server:
     image: gymlog-back-dev
+    env_file:
+      - .env
     build:
       context: ./backend
       dockerfile: dev.Dockerfile

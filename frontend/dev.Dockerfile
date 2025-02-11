@@ -10,14 +10,14 @@ COPY ./package.json ./package.json
 RUN npm install
 
 #COPY ./dist ./dist
-COPY ./public ./public
-COPY ./src ./src
-COPY ./.eslintrc.cjs ./.eslintrc.cjs
-COPY ./.prettierrc ./.prettierrc
-COPY ./.env ./.env
-COPY ./index.html ./index.html
-COPY ./README.md ./README.md
-COPY ./vite.config.js ./vite.config.js
+#COPY ./public ./public
+#COPY ./src ./src
+#COPY ./.eslintrc.cjs ./.eslintrc.cjs
+#COPY ./.prettierrc ./.prettierrc
+#COPY ./.env ./.env
+#COPY ./index.html ./index.html
+#COPY ./README.md ./README.md
+#COPY ./vite.config.js ./vite.config.js
 #COPY ./Dockerfile ./Dockerfile
 
 

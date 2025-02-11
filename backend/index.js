@@ -7,6 +7,9 @@ const cors = require('cors')
 // Reitit
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
+const forumRouter = require('./controllers/forum')
+const gymRouter = require('./controllers/gym')
+
 // Middleware
 const { errorHandler } = require('./customMW/errorHandler')
 
@@ -17,6 +20,8 @@ app.use(express.json())
 // Reitit
 app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
+app.use('/api/forum', forumRouter)
+app.use('/api/gym', gymRouter)
 
 app.use(errorHandler) // Viimeisenä !
 

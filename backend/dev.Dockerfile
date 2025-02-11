@@ -8,14 +8,14 @@ COPY ./package.json ./package.json
 # Development modessa käytetään npm install, ei npm ci !
 RUN npm install
 
-COPY ./controllers ./controllers
-COPY ./customMW ./customMW
-COPY ./migrations ./migrations
-COPY ./models ./models
-COPY ./util ./util
-COPY ./.env ./.env
-COPY ./index.js ./index.js
-COPY ./README.md ./README.md
+#COPY ./controllers ./controllers
+#COPY ./customMW ./customMW
+#COPY ./migrations ./migrations
+#COPY ./models ./models
+#COPY ./util ./util
+#COPY ./.env ./.env
+#COPY ./index.js ./index.js
+#COPY ./README.md ./README.md
 
 ENV DEBUG=playground:*
 

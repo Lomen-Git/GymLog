@@ -1,18 +1,22 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from 'react'
 import {
   BrowserRouter as Router,
   Route,
   Routes,
   Navigate,
-} from "react-router-dom"
+} from 'react-router-dom'
 
-import LoginForm from './components/auth/LoginForm'
-import Mermaid from './components/Mermaid'
-import Navbar from './components/Navbar'
-import Footer from "./components/Footer"
-import loginService from './services/login'
-import logsService from './services/logs'
+import LoginForm from './components/auth/LoginFormDS'
+import Header from './components/Header/Header'
+import Homepage from './components/Home/Homepage'
+import ProgramEditor from './components/EditProgram/ProgramEditor'
+import WorkoutView from './components/Workouts/WorkoutView'
+import Community from './components/Community/Community'
+import Profile from './components/User/Profile'
+//import Mermaid from './components/Mermaid'
 import './App.css'
+
+import { UserContext } from './userContext'
 
 
 const PrivateRoute = ({ children, isAuthenticated }) => {
@@ -24,12 +28,7 @@ const PrivateRoute = ({ children, isAuthenticated }) => {
 }
 
 const App = () => {
-  const [user, setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
+  const { user, setUser, isAuthenticated, setIsAuthenticated } = useContext(UserContext)
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -37,31 +36,8 @@ const App = () => {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
       setIsAuthenticated(true)
-      logsService.setToken(user.token)
     }
   }, [])
-
-  const handleLogin = async (event) => {
-    event.preventDefault()
-    try {
-      const credentials = { username, password }
-      const user = await loginService.login(credentials)
-      window.localStorage.setItem(
-        'loggedUser', JSON.stringify(user)
-      )
-      logsService.setToken(user.token)
-      setUser(user)
-      setIsAuthenticated(true)
-      setUsername('')
-      setPassword('')
-    } catch (error) {
-      const message = JSON.stringify(error.response.data.error)
-      setErrorMessage(message)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-    }
-  }
 
   const handleLogout = () => {
     setUser(null)
@@ -72,40 +48,68 @@ const App = () => {
   }
 
   return (
-    <Router>
-      <div>
-        {user && <Navbar user={user} handleLogout={handleLogout} />}
-      </div>
-      <div className="content">
-        <Routes>
-          <Route path="/login" element={user ? (
-                <Navigate to="/" />
-              ) : (
-                <LoginForm
-                  username={username}
-                  password={password}
-                  handlePasswordChange={({ target }) => setPassword(target.value)}
-                  handleUsernameChange={({ target }) => setUsername(target.value)}
-                  handleSubmit={handleLogin}
-                  errorMessage={errorMessage}
-                />
-              )
-            }
-          />
-
-          <Route
-            path="/"
+    <div className="bg-neutral-800 min-h-screen">
+      <Router>
+        <div>
+          {user && <Header user={user} handleLogout={handleLogout} />}
+        </div>
+        <div className="content">
+          <Routes>
+            <Route path="/login"
             element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <h1>Tervetuloa kotisivulle!</h1>
-                <Mermaid />
-              </PrivateRoute>
+              user ? <Navigate to="/" /> : <LoginForm />
             }
-          />
-        </Routes>
-      </div>
-      <div><Footer /></div>
-    </Router>
+            />
+
+            <Route
+              path="/"
+              element={
+                <PrivateRoute isAuthenticated={isAuthenticated}>
+                  <Homepage />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/program"
+              element={
+                <PrivateRoute isAuthenticated={isAuthenticated}>
+                  <ProgramEditor />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/workout"
+              element={
+                <PrivateRoute isAuthenticated={isAuthenticated}>
+                  <WorkoutView />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/community"
+              element={
+                <PrivateRoute isAuthenticated={isAuthenticated}>
+                  <Community />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute isAuthenticated={isAuthenticated}>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+            
+          </Routes>
+        </div>
+      </Router>
+    </div>
   )
 }
 
