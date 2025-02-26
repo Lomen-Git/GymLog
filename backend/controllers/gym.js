@@ -277,7 +277,29 @@ router.get('/programs/ongoing', tokenSessionExtractor, async (req, res) => {
       ]
     });
 
-    res.json({ execution, program });
+    // 4. Hae käyttäjän suorittamat treenit tätä ohjelmaa varten
+    const completedWorkouts = await CompletedWorkout.findAll({
+      where: { 
+        programExecutionId: execution.id,
+        userId: req.user.id
+      },
+      include: [
+        {
+          model: CompletedExercise,
+          include: [
+            { model: CompletedSet },
+            { model: Exercise }
+          ]
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({ 
+      execution, 
+      program,
+      completedWorkouts 
+    });
   } catch (error) {
     // 4. Käsiteltävät virhekoodit (PostgreSQL)
     const missingTableCodes = ['42P01', '42S02']; // Puuttuva taulu

@@ -84,6 +84,9 @@ export const getProgramDetails = async (programId) => {
   }
 }
 
+// In frontend/src/services/programServices.jsx
+
+// Update the getOngoingProgram function
 export const getOngoingProgram = async () => {
   try {
     const token = getToken()
@@ -96,6 +99,67 @@ export const getOngoingProgram = async () => {
     throw error
   }
 }
+
+// Add a helper function to determine if a workout has been completed
+export const isWorkoutCompleted = (workoutId, completedWorkouts) => {
+  if (!completedWorkouts || !completedWorkouts.length) return false;
+  
+  return completedWorkouts.some(
+    completedWorkout => completedWorkout.workoutId === workoutId
+  );
+}
+
+// Add a function to get completed workout data for a specific workout
+export const getCompletedWorkoutData = (workoutId, completedWorkouts) => {
+  if (!completedWorkouts || !completedWorkouts.length) return null;
+  
+  return completedWorkouts.find(
+    completedWorkout => completedWorkout.workoutId === workoutId
+  ) || null;
+}
+
+// Similar to createWorkoutSession but with completed data incorporated
+export const createWorkoutSessionWithHistory = (workout, completedWorkout = null) => {
+  if (!workout?.WorkoutExercises) throw new Error('Invalid workout data');
+  
+  return {
+    workoutId: workout.id,
+    name: workout.name,
+    isCompleted: !!completedWorkout,
+    completedAt: completedWorkout?.createdAt || null,
+    exercises: workout.WorkoutExercises.map(exercise => {
+      // Find matching completed exercise if available
+      const completedExercise = completedWorkout?.CompletedExercises?.find(
+        ce => ce.exerciseId === exercise.exerciseId
+      );
+      
+      return {
+        exerciseId: exercise.exerciseId,
+        name: exercise.Exercise.name,
+        isCompleted: !!completedExercise,
+        sets: exercise.Sets.map((set, index) => {
+          // Find matching completed set if available
+          const completedSet = completedExercise?.CompletedSets?.[index];
+          
+          return {
+            setId: set.id,
+            targetReps: set.reps,
+            targetValue: set.value,
+            completedReps: completedSet?.completedReps || null,
+            completedValue: completedSet?.completedValue || null,
+            weight: completedSet?.weight || null,
+            isCompleted: !!completedSet?.isCompleted
+          };
+        })
+      };
+    })
+  };
+}
+
+
+
+
+// zzz
 
 export const createOngoingProgram = async (programId) => {
   try {
