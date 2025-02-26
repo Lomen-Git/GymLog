@@ -11,7 +11,7 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true
       },
-      programId: {
+      program_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -19,7 +19,7 @@ module.exports = {
           key: 'id'
         }
       },
-      userId: {
+      user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -27,14 +27,24 @@ module.exports = {
           key: 'id'
         }
       },
-      weekIndex: {
+      week_index: {
         type: DataTypes.INTEGER,
       },
-      workoutIndex: {
+      workout_index: {
         type: DataTypes.INTEGER,
       },
       status: {
         type: DataTypes.BOOLEAN,
+      },
+      created_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: sequelize.NOW
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: sequelize.NOW
       }
     })
 

@@ -21,7 +21,7 @@ const { sequelize } = require('../util/db')
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'workout_exercises',
+      model: 'workout_exercises',   // Taulun nimi tietokannassa
       key: 'id',
       onDelete: 'CASCADE'
     }

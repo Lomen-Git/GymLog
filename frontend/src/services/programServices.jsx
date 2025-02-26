@@ -14,10 +14,18 @@ const getToken = () => {
   const user = JSON.parse(loggedUserJSON)
   return `Bearer ${user.token}`
 }
+// Apufunktio userid hakemiseen
+const getUserId = () => {
+  const loggedUserJSON = window.localStorage.getItem('loggedUser')
+  if (!loggedUserJSON || loggedUserJSON === 'null') {
+    throw new Error('User is not logged in')
+  }
+  const user = JSON.parse(loggedUserJSON)
+  return user.userId
+}
 
 // Luo ohjelma
 export const createProgram = async (program) => {
-  console.log('create program servisessä ollaan')
   try {
     const token = getToken()
     const response = await api.post('/programs',
@@ -89,6 +97,27 @@ export const getOngoingProgram = async () => {
   }
 }
 
+export const createOngoingProgram = async (programId) => {
+  try {
+    const token = getToken()
+    const userId = getUserId()
+    const data = {
+      userId: userId,
+      programId: programId
+    }
+    const response = await api.post(`/programs/start/${programId}`,
+      {data},
+      {
+      headers: { Authorization: token }
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error creating ongoing program:', error)
+    throw error
+  }
+}
+
 export const startProgram = async (programId) => {
   try {
     const token = getToken()
@@ -98,6 +127,26 @@ export const startProgram = async (programId) => {
     return response.data
   } catch (error) {
     console.error('Error starting program:', error)
+    throw error
+  }
+}
+
+// Treenin suoritus
+export const createCompletedWorkout = async (workoutData) => {
+  try {
+    const token = getToken()
+    
+    console.log('koitetaan tällänen laittaa,', workoutData)
+    const response = await api.post('/programs/completed', 
+      { workoutData },
+      {
+        headers: { Authorization: token }
+      }
+    )
+    
+    return response.data
+  } catch (error) {
+    console.error('Error saving completed workout:', error)
     throw error
   }
 }

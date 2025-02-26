@@ -11,6 +11,9 @@ const WorkoutExercise = require('./g_workout_exercises')
 const Set = require('./g_set')
 const Week = require('./g_week')
 const ProgramExecution = require('./g_program_execution')
+const CompletedWorkout = require('./g_completed_workout')
+const CompletedExercise = require('./g_completed_exercise')
+const CompletedSet = require('./g_completed_set')
 
 // FORUM FORUM FORUM FORUM FORUM FORUM
 const ForumPost = require('./f_forumPost')
@@ -60,6 +63,34 @@ Program.hasMany(ProgramExecution, {
   foreignKey: 'programId',
   as: 'programExecutions',
   ondelete: 'CASCADE'
+})
+
+CompletedWorkout.belongsTo(ProgramExecution, {
+  foreignKey: 'programExecutionId'
+})
+ProgramExecution.hasMany(CompletedWorkout, {
+  foreignKey: 'programExecutionId',
+})
+
+CompletedWorkout.hasMany(CompletedExercise, {
+  foreignKey: 'completed_workout_id'
+})
+CompletedExercise.belongsTo(CompletedWorkout, {
+  foreignKey: 'completed_workout_id'
+})
+
+CompletedExercise.belongsTo(Exercise, {
+  foreignKey: 'exercise_id'
+})
+Exercise.hasMany(CompletedExercise, {
+  foreignKey: 'exercise_id'
+})
+
+CompletedExercise.hasMany(CompletedSet, {
+  foreignKey: 'completedExerciseId'
+})
+CompletedSet.belongsTo(CompletedExercise, {
+  foreignKey: 'completedExerciseId'
 })
 
 /// FORUM FORUM FORUM FORUM FORUM FORUM FORUM
@@ -141,6 +172,9 @@ module.exports = {
     Set,
     Week,
     ProgramExecution,
+    CompletedWorkout,
+    CompletedExercise,
+    CompletedSet,
 
     User,
     ForumPost,

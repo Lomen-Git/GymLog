@@ -17,7 +17,7 @@ const { sequelize } = require('../util/db')
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'programs',
+      model: 'programs',    // Taulun nimi tietokannassa
       key: 'id',
       onDelete: 'CASCADE'
     }

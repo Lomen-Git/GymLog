@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require('sequelize')
 const { sequelize } = require('../util/db')
 
- class Program extends Model {}
+ class CompletedWorkout extends Model {}
 
- Program.init({
+ CompletedWorkout.init({
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -11,7 +11,19 @@ const { sequelize } = require('../util/db')
   },
   name: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
+  },
+  programExecutionId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'program_executions',       // Taulun nimi tietokannassa
+      key: 'id'
+    }
+  },
+  notes: {
+    type: DataTypes.STRING,
+    allowNull: true
   },
   userId: {
     type: DataTypes.INTEGER,
@@ -21,15 +33,11 @@ const { sequelize } = require('../util/db')
       key: 'id'
     }
   },
-  choice: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  }
  }, {
   sequelize,
   underscored: true,
   timestamps: true,
-  modelName: 'Program'
+  modelName: 'CompletedWorkout'
  })
 
- module.exports = Program
+ module.exports = CompletedWorkout

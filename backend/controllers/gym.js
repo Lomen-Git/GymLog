@@ -1,4 +1,3 @@
-const express = require('express')
 const router = require('express').Router()
 const {
   User,
@@ -9,7 +8,10 @@ const {
   WorkoutExercise,
   Set,
   Week,
-  ProgramExecution
+  ProgramExecution,
+  CompletedWorkout,
+  CompletedExercise,
+  CompletedSet
   } = require('../models/zzz_index')
 const { sequelize } = require('../util/db')
 const tokenSessionExtractor = require('../customMW/tokenSessionExtractor')
@@ -275,7 +277,7 @@ router.get('/programs/ongoing', tokenSessionExtractor, async (req, res) => {
       ]
     });
 
-    res.json(program);
+    res.json({ execution, program });
   } catch (error) {
     // 4. Käsiteltävät virhekoodit (PostgreSQL)
     const missingTableCodes = ['42P01', '42S02']; // Puuttuva taulu
@@ -291,14 +293,16 @@ router.get('/programs/ongoing', tokenSessionExtractor, async (req, res) => {
 
     res.status(500).json({ error: error.message });
   }
-});
+})
 
 // Aloita uusi ohjelma
 router.post('/programs/start/:id', tokenSessionExtractor, async (req, res) => {
   try {
     await ProgramExecution.create({
       programId: req.params.id,
-      userId: req.user.id,
+      userId: req.body.data.userId,
+      weekIndex: 0,
+      workoutIndex: 0,
       status: true
     })
     
@@ -332,6 +336,58 @@ router.get('/programs/:id', tokenSessionExtractor, async (req, res) => {
     res.json(program)
   } catch (error) {
     res.status(500).json({ error: error.message })
+  }
+})
+
+// Treenin suoritus
+router.post('/programs/completed', tokenSessionExtractor, async (req, res) => {
+  try {
+    const { workoutData }= req.body
+    console.log('datadatadatadatadatadatadatadatadatadata', workoutData)
+    const { workoutId, programExecutionId, name, isCompleted, exercises } = workoutData
+    console.log('programexecutionid', programExecutionId)
+    console.log('name', name)
+    console.log('exercises', exercises)
+    const userId = req.user.id
+
+
+    // 1. Luo completed_workout
+    const completedWorkout = await CompletedWorkout.create({
+      name: name,
+      programExecutionId: programExecutionId,
+      notes: '',
+      userId: userId
+    });
+
+    // 2. Käy läpi harjoitukset
+    for (const exercise of exercises) {
+      // 3. Luo completed_exercise
+      const completedExercise = await CompletedExercise.create({
+        name: exercise.name,
+        completedWorkoutId: completedWorkout.id,
+        exerciseId: exercise.exerciseId,
+        notes: '',
+        userId: userId
+      })
+
+      // 4. Käy läpi sarjat
+      for (const set of exercise.sets) {
+        await CompletedSet.create({
+          completedExerciseId: completedExercise.id,
+          targetReps: set.targetReps,
+          targetValue: set.targetValue,
+          completedReps: set.completedReps,
+          completedValue: set.completedValue,
+          weight: set.weight,
+          userId: userId
+        })
+      }
+    }
+
+    res.status(201).end();
+  } catch (error) {
+    console.error('Error saving workout:', error);
+    res.status(500).json({ error: 'Workout saving failed' })
   }
 })
 

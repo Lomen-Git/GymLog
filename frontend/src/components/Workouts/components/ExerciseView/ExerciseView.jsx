@@ -1,26 +1,38 @@
-import React, { useState } from 'react';
-import { Info, MessageSquare, Check, Plus } from 'lucide-react';
-import Timer from './Timer';
-import ExerciseSetRPM from './ExerciseSetRPM';
+import React, { useState, useEffect } from 'react'
+import { Info, MessageSquare, Check, Plus } from 'lucide-react'
+import ExerciseSetRPM from './components/ExerciseSetRPM'
+import Timer from './components/Timer'
+
 
 const ExerciseView = ({ exercise = {}, onClose }) => {
-  const [setsData, setSetsData] = useState(exercise.sets || []);
+  const [setsData, setSetsData] = useState(exercise.sets || [])
+
+  useEffect(() => {
+    if (exercise && exercise.sets) {
+      setSetsData(exercise.sets)
+    }
+  }, [exercise])
+ 
 
   const handleSetUpdate = (setIndex, newData) => {
-    const updatedSets = [...setsData];
-    updatedSets[setIndex] = { ...updatedSets[setIndex], ...newData };
-    setSetsData(updatedSets);
-  };
+    const updatedSets = [...setsData]
+    updatedSets[setIndex] = { ...updatedSets[setIndex], ...newData }
+    setSetsData(updatedSets)
+  }
 
   const addSet = () => {
+    const len = exercise.sets.length + 1
     const newSet = {
-      reps: exercise.defaultReps || 10,
-      actualReps: '',
-      rpe: '',
+      setId: len,
+      targetReps: -1,
+      targetValue: -1,
+      completedReps: null,
+      completedValue: null,
+      isCompleted: false,
       weight: ''
-    };
-    setSetsData([...setsData, newSet]);
-  };
+    }
+    setSetsData([...setsData, newSet])
+  }
 
   return (
     <div className="max-w-md mx-auto h-screen flex flex-col text-white p-4">
@@ -46,8 +58,10 @@ const ExerciseView = ({ exercise = {}, onClose }) => {
           <ExerciseSetRPM
             key={index}
             setNumber={index + 1}
-            plannedReps={set.reps}
+            targetReps={set.targetReps}
+            targetValue={set.targetValue}
             onUpdate={(_, data) => handleSetUpdate(index, data)}
+            set={set}
           />
         ))}
       </div>
@@ -61,21 +75,21 @@ const ExerciseView = ({ exercise = {}, onClose }) => {
           <Plus className="w-5 h-5" /> Add set
         </button>
         <button
-          onClick={onClose}
+          onClick={() => onClose(setsData)}
           className="flex items-center gap-2 px-4 py-2 bg-indigo-700 rounded-lg hover:bg-indigo-600 transition-colors"
         >
           <Check className="w-5 h-5" /> Done
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
 ExerciseView.defaultProps = {
   exercise: {
     name: 'Nimetön harjoitus',
     sets: []
   }
-};
+}
 
-export default ExerciseView;
+export default ExerciseView
