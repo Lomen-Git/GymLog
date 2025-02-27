@@ -21,6 +21,14 @@ const { sequelize } = require('../util/db')
       key: 'id'
     }
   },
+  workoutId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'workouts',
+      key: 'id'
+    }
+  },
   notes: {
     type: DataTypes.STRING,
     allowNull: true

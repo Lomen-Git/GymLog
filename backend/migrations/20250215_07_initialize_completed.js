@@ -23,6 +23,14 @@ module.exports = {
           key: 'id'
         }
       },
+      workout_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'workouts',
+          key: 'id'
+        }
+      },
       notes: {
         type: DataTypes.STRING,
         allowNull: true

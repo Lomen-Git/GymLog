@@ -51,10 +51,19 @@ export const transformProgramData = (programData) => {
   // Create a map of completed workouts by ID for faster lookup
   const completedWorkoutMap = {};
   completedWorkouts.forEach(workout => {
-    // We're assuming the workout has a reference to the original workoutId
-    // If not, we'll need to use name or other identifiers
+    // Check if completedWorkouts has the workoutId property
+    // If not, try to match by name or other properties
     if (workout.workoutId) {
       completedWorkoutMap[workout.workoutId] = workout;
+    } else {
+      // For already saved workouts without workoutId, try to match by name
+      program.Weeks.forEach(week => {
+        week.Workouts.forEach(w => {
+          if (w.name === workout.name) {
+            completedWorkoutMap[w.id] = workout;
+          }
+        });
+      });
     }
   });
 

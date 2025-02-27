@@ -377,6 +377,7 @@ router.post('/programs/completed', tokenSessionExtractor, async (req, res) => {
     const completedWorkout = await CompletedWorkout.create({
       name: name,
       programExecutionId: programExecutionId,
+      workoutId: workoutId,
       notes: '',
       userId: userId
     });

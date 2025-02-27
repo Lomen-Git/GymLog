@@ -191,6 +191,15 @@ const WorkoutView = () => {
       // Refresh program data
       await fetchOngoingProgram();
       
+      // Move to the next workout if available
+      if (transformedProgram) {
+        const { next } = getWorkoutNavigation(transformedProgram);
+        if (next) {
+          setSelectedWeekIndex(next.weekIndex);
+          setSelectedWorkoutIndex(next.workoutIndex);
+        }
+      }
+      
       // Return to navigation view
       setViewMode('navigation');
     } catch (error) {

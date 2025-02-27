@@ -93,6 +93,13 @@ CompletedSet.belongsTo(CompletedExercise, {
   foreignKey: 'completedExerciseId'
 })
 
+CompletedWorkout.belongsTo(Workout, {
+  foreignKey: 'workout_id'
+})
+Workout.hasMany(CompletedWorkout, {
+  foreignKey: 'workout_id'
+})
+
 /// FORUM FORUM FORUM FORUM FORUM FORUM FORUM
 // User
 User.hasMany(ForumPost, {
