@@ -11,7 +11,8 @@ const {
   ProgramExecution,
   CompletedWorkout,
   CompletedExercise,
-  CompletedSet
+  CompletedSet,
+  TempWorkoutProgress
   } = require('../models/zzz_index')
 const { sequelize } = require('../util/db')
 const tokenSessionExtractor = require('../customMW/tokenSessionExtractor')
@@ -334,33 +335,6 @@ router.post('/programs/start/:id', tokenSessionExtractor, async (req, res) => {
   }
 })
 
-router.get('/programs/:id', tokenSessionExtractor, async (req, res) => {
-  try {
-    const program = await Program.findOne({
-      where: { id: req.params.id, userId: req.user.id },
-      include: [
-        { 
-          model: Week, 
-          include: [{ 
-            model: Workout, 
-            include: [{ 
-              model: WorkoutExercise, 
-              include: [
-                { model: Set },
-                { model: Exercise },
-              ]
-              // tarvitseeko haettava data määtittää tässä?? [id, esim, ...] 
-            }]
-          }]
-        }
-      ]
-    })
-    res.json(program)
-  } catch (error) {
-    res.status(500).json({ error: error.message })
-  }
-})
-
 // Treenin suoritus
 router.post('/programs/completed', tokenSessionExtractor, async (req, res) => {
   try {
@@ -411,6 +385,164 @@ router.post('/programs/completed', tokenSessionExtractor, async (req, res) => {
   } catch (error) {
     console.error('Error saving workout:', error);
     res.status(500).json({ error: 'Workout saving failed' })
+  }
+})
+
+// Add this route to backend/controllers/gym.js
+
+// Save partial workout progress (individual exercise)
+router.post('/programs/exercise-progress', tokenSessionExtractor, async (req, res) => {
+  try {
+    const { exerciseData } = req.body;
+    const userId = req.user.id;
+    
+    // Check if there's an existing temporary progress for this workout
+    let progressRecord = await TempWorkoutProgress.findOne({
+      where: {
+        programExecutionId: exerciseData.programExecutionId,
+        userId: userId
+      }
+    });
+    
+    // Create or update the progress record
+    if (!progressRecord) {
+      // Initialize a new progress record with the first exercise
+      progressRecord = await TempWorkoutProgress.create({
+        programExecutionId: exerciseData.programExecutionId,
+        workoutId: exerciseData.workoutId,
+        userId: userId,
+        progressData: JSON.stringify({
+          name: exerciseData.name,
+          exercises: exerciseData.exercises
+        })
+      });
+    } else {
+      // Update existing progress by merging the updated exercise
+      const existingData = JSON.parse(progressRecord.progressData);
+      const updatedExercise = exerciseData.exercises[0];
+      
+      // Find and update the specific exercise in the existing data
+      const updatedExercises = existingData.exercises.map(ex => 
+        ex.exerciseId === updatedExercise.exerciseId ? updatedExercise : ex
+      );
+      
+      // If exercise doesn't exist in progress yet, add it
+      if (!existingData.exercises.some(ex => ex.exerciseId === updatedExercise.exerciseId)) {
+        updatedExercises.push(updatedExercise);
+      }
+      
+      // Update the record
+      await progressRecord.update({
+        progressData: JSON.stringify({
+          ...existingData,
+          exercises: updatedExercises
+        })
+      });
+    }
+    
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error saving exercise progress:', error);
+    res.status(500).json({ error: 'Failed to save exercise progress' });
+  }
+});
+
+// Add this route to backend/controllers/gym.js
+router.get('/programs/exercise-progress', tokenSessionExtractor, async (req, res) => {
+  try {
+    const { programExecutionId, workoutId } = req.query;
+    const userId = req.user.id;
+    
+    const progressRecord = await TempWorkoutProgress.findOne({
+      where: {
+        programExecutionId,
+        workoutId,
+        userId
+      }
+    });
+    
+    if (!progressRecord) {
+      return res.json(null);
+    }
+    
+    // Parse the saved progress data
+    const progressData = JSON.parse(progressRecord.progressData);
+    res.json(progressData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/exercises/:id/history', tokenSessionExtractor, async (req, res) => {
+  try {
+    const exerciseId = req.params.id;
+    const userId = req.user.id;
+    
+    // Find all completed exercises for this exercise ID
+    const completedExercises = await CompletedExercise.findAll({
+      where: {
+        exerciseId,
+        userId
+      },
+      include: [
+        {
+          model: CompletedSet,
+          attributes: ['id', 'completedReps', 'completedValue', 'weight']
+        },
+        {
+          model: CompletedWorkout,
+          attributes: ['id', 'name', 'createdAt']
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 10 // Limit to the last 10 workouts for performance
+    });
+    
+    // Transform data for frontend
+    const history = completedExercises.map(exercise => ({
+      id: exercise.id,
+      date: exercise.createdAt,
+      workoutName: exercise.CompletedWorkout.name,
+      workoutId: exercise.CompletedWorkout.id,
+      workoutDate: exercise.CompletedWorkout.createdAt,
+      sets: exercise.CompletedSets.map(set => ({
+        id: set.id,
+        completedReps: set.completedReps,
+        completedValue: set.completedValue,
+        weight: set.weight
+      }))
+    }));
+    
+    res.json({ history });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/programs/:id', tokenSessionExtractor, async (req, res) => {
+  try {
+    const program = await Program.findOne({
+      where: { id: req.params.id, userId: req.user.id },
+      include: [
+        { 
+          model: Week, 
+          include: [{ 
+            model: Workout, 
+            include: [{ 
+              model: WorkoutExercise, 
+              include: [
+                { model: Set },
+                { model: Exercise },
+              ]
+              // tarvitseeko haettava data määtittää tässä?? [id, esim, ...] 
+            }]
+          }]
+        }
+      ]
+    })
+    res.json(program)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
   }
 })
 

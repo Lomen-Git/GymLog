@@ -14,6 +14,7 @@ const ProgramExecution = require('./g_program_execution')
 const CompletedWorkout = require('./g_completed_workout')
 const CompletedExercise = require('./g_completed_exercise')
 const CompletedSet = require('./g_completed_set')
+const TempWorkoutProgress = require('./g_temp_workout_progress')
 
 // FORUM FORUM FORUM FORUM FORUM FORUM
 const ForumPost = require('./f_forumPost')
@@ -100,6 +101,17 @@ Workout.hasMany(CompletedWorkout, {
   foreignKey: 'workout_id'
 })
 
+TempWorkoutProgress.belongsTo(User, {
+  foreignKey: 'userId'
+});
+TempWorkoutProgress.belongsTo(ProgramExecution, {
+  foreignKey: 'programExecutionId'
+});
+TempWorkoutProgress.belongsTo(Workout, {
+  foreignKey: 'workoutId'
+});
+
+
 /// FORUM FORUM FORUM FORUM FORUM FORUM FORUM
 // User
 User.hasMany(ForumPost, {
@@ -182,6 +194,7 @@ module.exports = {
     CompletedWorkout,
     CompletedExercise,
     CompletedSet,
+    TempWorkoutProgress,
 
     User,
     ForumPost,

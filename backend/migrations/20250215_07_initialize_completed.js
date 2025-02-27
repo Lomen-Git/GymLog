@@ -132,6 +132,44 @@ module.exports = {
             key: 'id'
           }
         },
+    }),
+
+    await queryInterface.createTable('temp_workout_progresses', {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+        },
+        user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: 'users', key: 'id' }
+        },
+        program_execution_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: 'program_executions', key: 'id' }
+        },
+        workout_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: 'workouts', key: 'id' }
+        },
+        progress_data: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        comment: 'JSON string containing the saved progress data'
+        },
+        created_at: {
+          type: DataTypes.DATE,
+          allowNull: false,
+          defaultValue: sequelize.NOW
+        },
+        updated_at: {
+          type: DataTypes.DATE,
+          allowNull: false,
+          defaultValue: sequelize.NOW
+        }
     })
 
 
@@ -139,6 +177,7 @@ module.exports = {
     await queryInterface.dropTable('completed_workouts')
     await queryInterface.dropTable('completed_exercises')
     await queryInterface.dropTable('completed_sets')
+    await queryInterface.dropTable('temp_workout_progress')
   }
 }
 }

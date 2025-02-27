@@ -10,7 +10,7 @@ import LoginForm from './components/auth/LoginFormDS'
 import Header from './components/Header/Header'
 import Homepage from './components/Home/Homepage'
 import ProgramEditor from './components/EditProgram/ProgramEditor'
-import WorkoutView from './components/Workouts/WorkoutView'
+import WorkoutContainer from './components/Workouts/WorkoutContainer'
 import Community from './components/Community/Community'
 import Profile from './components/User/Profile'
 //import Mermaid from './components/Mermaid'
@@ -83,7 +83,7 @@ const App = () => {
               path="/workout"
               element={
                 <PrivateRoute isAuthenticated={isAuthenticated}>
-                  <WorkoutView />
+                  <WorkoutContainer />
                 </PrivateRoute>
               }
             />

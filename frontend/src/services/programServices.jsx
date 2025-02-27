@@ -156,8 +156,68 @@ export const createWorkoutSessionWithHistory = (workout, completedWorkout = null
   };
 }
 
+// In frontend/src/services/programServices.jsx
+// Add a new function to save exercise progress
+
+export const saveExerciseProgress = async (workoutData, exerciseId, updatedSets) => {
+  try {
+    const token = getToken();
+    
+    // Create a copy of the workout data with only the updated exercise
+    const exerciseData = {
+      workoutId: workoutData.workoutId,
+      programExecutionId: workoutData.programExecutionId,
+      name: workoutData.name,
+      partialSave: true, // Flag to indicate this is not a complete workout save
+      exercises: workoutData.exercises
+        .filter(ex => ex.exerciseId === exerciseId)
+        .map(ex => ({
+          ...ex,
+          sets: updatedSets
+        }))
+    };
+    
+    const response = await api.post('/programs/exercise-progress', 
+      { exerciseData },
+      {
+        headers: { Authorization: token }
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error saving exercise progress:', error);
+    throw error;
+  }
+}
 
 
+export const getSavedWorkoutProgress = async (programExecutionId, workoutId) => {
+  try {
+    const token = getToken();
+    const response = await api.get(`/programs/exercise-progress`, {
+      params: { programExecutionId, workoutId },
+      headers: { Authorization: token }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching saved progress:', error);
+    throw error;
+  }
+}
+
+export const getExerciseHistory = async (exerciseId) => {
+  try {
+    const token = getToken();
+    const response = await api.get(`/exercises/${exerciseId}/history`, {
+      headers: { Authorization: token }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching exercise history:', error);
+    throw error;
+  }
+}
 
 // zzz
 

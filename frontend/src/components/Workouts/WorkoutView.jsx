@@ -1,21 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Info, MoreVertical, Check, ArrowLeft, Plus, ArrowRight, Calendar, RefreshCcw } from 'lucide-react';
-
-// Helpers and utilities
-import {
-  transformProgramData,
-  getCurrentWorkout,
-  getWorkoutByIndices,
-  getWorkoutNavigation
-} from './utils/workoutHelpers';
-
-// Services
-import {
-  getOngoingProgram,
-  getProgramList,
-  createOngoingProgram,
-  createCompletedWorkout
-} from '../../services/programServices';
+import React from 'react';
+import { Info, MoreVertical, Check, ArrowLeft, Plus, RefreshCcw } from 'lucide-react';
 
 // Components
 import ExerciseView from './components/ExerciseView/ExerciseView';
@@ -24,237 +8,46 @@ import WorkoutNavigation from './components/WorkoutNavigation';
 import CompletedWorkoutView from './components/CompletedWorkoutView';
 import ExerciseSetRPM from './components/ExerciseView/components/ExerciseSetRPM';
 import Timer from './components/ExerciseView/components/Timer';
+import ExerciseHistoryView from './components/ExerciseHistoryView';
 
 // Popups
 import { StartProgramPopup } from './Popups/StartProgramPopup';
 
-const WorkoutView = () => {
-  // Program state
-  const [programData, setProgramData] = useState(null);
-  const [transformedProgram, setTransformedProgram] = useState(null);
-  const [programList, setProgramList] = useState([]);
-  
-  // View state
-  const [viewMode, setViewMode] = useState('navigation'); // 'navigation', 'workout', 'exercise', 'history'
-  const [selectedWeekIndex, setSelectedWeekIndex] = useState(null);
-  const [selectedWorkoutIndex, setSelectedWorkoutIndex] = useState(null);
-  
-  // Exercise state
-  const [selectedExercise, setSelectedExercise] = useState(null);
-  const [exerciseDataBeforeEdit, setExerciseDataBeforeEdit] = useState(null);
-  const [hasExerciseChanged, setHasExerciseChanged] = useState(false);
-  
-  // UI state
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showStartPopup, setShowStartPopup] = useState(false);
-  const [selectedProgram, setSelectedProgram] = useState(null);
-  const [activeWorkout, setActiveWorkout] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Fetch ongoing program on component mount
-  useEffect(() => {
-    fetchOngoingProgram();
-  }, []);
-
-  // Transform raw program data into a more usable format
-  useEffect(() => {
-    if (programData) {
-      const transformed = transformProgramData(programData);
-      setTransformedProgram(transformed);
-      
-      // Set selected indices to current if available
-      if (transformed) {
-        setSelectedWeekIndex(transformed.currentWeekIndex);
-        setSelectedWorkoutIndex(transformed.currentWorkoutIndex);
-      }
-    }
-  }, [programData]);
-
-  // Update active workout when selected indices change
-  useEffect(() => {
-    if (transformedProgram && selectedWeekIndex !== null && selectedWorkoutIndex !== null) {
-      const workout = getWorkoutByIndices(transformedProgram, selectedWeekIndex, selectedWorkoutIndex);
-      if (workout) {
-        // Create a workout session from the selected workout
-        const workoutSession = createWorkoutSession(workout, transformedProgram);
-        setActiveWorkout(workoutSession);
-      }
-    }
-  }, [transformedProgram, selectedWeekIndex, selectedWorkoutIndex]);
-
-  // Fetch ongoing program data
-  const fetchOngoingProgram = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getOngoingProgram();
-      if (data === null) {
-        try {
-          const listData = await getProgramList();
-          setProgramList(listData);
-        } catch (error) {
-          console.error('Error fetching program list', error);
-        }
-      } else {
-        setProgramData(data);
-        setViewMode('navigation'); // Start with program navigation view
-      }
-    } catch (error) {
-      console.error('Error fetching ongoing program', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Select a workout to view/perform
-  const handleSelectWorkout = (weekIndex, workoutIndex) => {
-    setSelectedWeekIndex(weekIndex);
-    setSelectedWorkoutIndex(workoutIndex);
+const WorkoutView = (props) => {
+  const {
+    // State
+    programData,
+    transformedProgram,
+    programList,
+    isLoading,
+    viewMode,
+    selectedWeekIndex,
+    selectedWorkoutIndex,
+    selectedExercise,
+    exerciseDataBeforeEdit,
+    hasExerciseChanged,
+    viewingHistoryForExercise,
+    activeWorkout,
+    showStartPopup,
+    selectedProgram,
     
-    // If the workout is already completed, show history view instead
-    const workout = getWorkoutByIndices(transformedProgram, weekIndex, workoutIndex);
-    if (workout && workout.isCompleted) {
-      setViewMode('history');
-    } else {
-      setViewMode('workout');
-    }
-  };
+    // Handlers
+    fetchOngoingProgram,
+    handleSelectWorkout,
+    startProgram,
+    handleConfirmStart,
+    openExerciseView,
+    handleExerciseClose,
+    handleCompleteWorkout,
+    handleBackToNavigation,
+    handleSkipWorkout,
+    handleViewExerciseHistory,
+    handleBackFromHistory,
+    setHasExerciseChanged
+  } = props;
 
-  // Start a program
-  const startProgram = (id) => {
-    const program = programList.find(p => p.id === id);
-    if (program) {
-      setSelectedProgram(program);
-      setShowStartPopup(true);
-    }
-  };
-
-  // Confirm program start
-  const handleConfirmStart = async () => {
-    try {
-      await createOngoingProgram(selectedProgram.id);
-      await fetchOngoingProgram();
-      setShowStartPopup(false);
-    } catch (error) {
-      console.error('Error starting program', error);
-    }
-  };
-
-  // Open exercise view
-  const openExerciseView = useCallback((exercise) => {
-    setExerciseDataBeforeEdit(JSON.parse(JSON.stringify(exercise)));
-    setSelectedExercise(exercise);
-    setHasExerciseChanged(false);
-    setViewMode('exercise');
-  }, []);
-
-  // Handle exercise completion
-  const handleExerciseClose = useCallback((exerciseId, updatedSets, saveChanges = true) => {
-    if (!saveChanges) {
-      setSelectedExercise(null);
-      setViewMode('workout');
-      return;
-    }
-
-    setActiveWorkout((prevWorkout) => {
-      const newWorkout = { ...prevWorkout };
-  
-      const exerciseIndex = newWorkout.exercises.findIndex((ex) => ex.exerciseId === exerciseId);
-      
-      if (exerciseIndex !== -1) {
-        newWorkout.exercises[exerciseIndex] = {
-          ...newWorkout.exercises[exerciseIndex],
-          sets: updatedSets,
-          isCompleted: updatedSets.every(set => set.isCompleted),
-        };
-      }
-  
-      // Check if the entire workout is completed
-      newWorkout.isCompleted = newWorkout.exercises.every(ex => ex.isCompleted);
-      
-      return newWorkout;
-    });
-    
-    setSelectedExercise(null);
-    setViewMode('workout');
-  }, []);
-
-  // Complete the current workout
-  const handleCompleteWorkout = async () => {
-    try {
-      if (!activeWorkout) return;
-      
-      setIsLoading(true);
-      
-      // Save the workout completion
-      await createCompletedWorkout(activeWorkout);
-      
-      // Refresh program data
-      await fetchOngoingProgram();
-      
-      // Move to the next workout if available
-      if (transformedProgram) {
-        const { next } = getWorkoutNavigation(transformedProgram);
-        if (next) {
-          setSelectedWeekIndex(next.weekIndex);
-          setSelectedWorkoutIndex(next.workoutIndex);
-        }
-      }
-      
-      // Return to navigation view
-      setViewMode('navigation');
-    } catch (error) {
-      console.error("Error completing workout:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Helper function to create a workout session from a transformed workout
-  const createWorkoutSession = (workout, program) => {
-    if (!workout?.originalData?.WorkoutExercises) {
-      return null;
-    }
-
-    return {
-      workoutId: workout.id,
-      programExecutionId: program.programExecutionId,
-      name: workout.name,
-      isCompleted: workout.isCompleted,
-      weekIndex: workout.weekIndex,
-      workoutIndex: workout.workoutIndex,
-      exercises: workout.originalData.WorkoutExercises.map(exercise => ({
-        exerciseId: exercise.exerciseId,
-        name: exercise.Exercise.name,
-        isCompleted: false, // Start as not completed for the current session
-        sets: exercise.Sets.map(set => ({
-          setId: set.id,
-          targetReps: set.reps,
-          targetValue: set.value,
-          completedReps: null,
-          completedValue: null,
-          weight: null,
-          isCompleted: false
-        }))
-      }))
-    };
-  };
-
-  // Return to navigation view
-  const handleBackToNavigation = () => {
-    setViewMode('navigation');
-  };
-
-  // Skip to the next workout
-  const handleSkipWorkout = async () => {
-    // Logic to move to next workout without completing current one
-    try {
-      // Refresh program data (which will move to next workout)
-      await fetchOngoingProgram();
-      setViewMode('navigation');
-    } catch (error) {
-      console.error("Error skipping workout:", error);
-    }
-  };
+  // Local UI state
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   // If in exercise view, show ExerciseView component
   if (viewMode === 'exercise' && selectedExercise) {
@@ -273,10 +66,10 @@ const WorkoutView = () => {
               handleExerciseClose(selectedExercise.exerciseId, null, false);
             }
           } else {
-            setSelectedExercise(null);
-            setViewMode('workout');
+            handleExerciseClose(selectedExercise.exerciseId, null, false);
           }
         }}
+        onViewHistory={() => handleViewExerciseHistory(selectedExercise)}
         compareWithOriginal={exerciseDataBeforeEdit}
       />
     );
@@ -294,6 +87,17 @@ const WorkoutView = () => {
         />
       );
     }
+  }
+
+  // If in exercise history view
+  if (viewMode === 'exerciseHistory' && viewingHistoryForExercise) {
+    return (
+      <ExerciseHistoryView
+        exerciseId={viewingHistoryForExercise.exerciseId}
+        exerciseName={viewingHistoryForExercise.name}
+        onBack={handleBackFromHistory}
+      />
+    );
   }
 
   // Loading state
@@ -354,30 +158,38 @@ const WorkoutView = () => {
 
           {/* Exercise list */}
           <div className="flex-1 p-4 overflow-y-auto space-y-3">
-            {activeWorkout.exercises.map((exercise) => (
-              <div
-                key={exercise.exerciseId}
-                onClick={() => openExerciseView(exercise)}
-                className={`
-                  p-4 bg-gray-800 rounded-lg cursor-pointer 
-                  hover:bg-gray-700 transition-colors
-                  border ${exercise.isCompleted ? 'border-green-600' : 'border-gray-600'}
-                `}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-lg text-gray-100">{exercise.name}</span>
-                  <span className="text-sm text-gray-400">
-                    {exercise.sets.length} sets
-                    {exercise.isCompleted && 
-                      <span className="ml-2 text-green-500">✓</span>
-                    }
-                  </span>
+            {activeWorkout && Array.isArray(activeWorkout.exercises) && activeWorkout.exercises.length > 0 ? (
+              activeWorkout.exercises.map((exercise) => (
+                <div
+                  key={exercise.exerciseId}
+                  onClick={() => openExerciseView(exercise)}
+                  className={`
+                    p-4 bg-gray-800 rounded-lg cursor-pointer 
+                    hover:bg-gray-700 transition-colors
+                    border ${exercise.isCompleted ? 'border-green-600' : 'border-gray-600'}
+                  `}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg text-gray-100">{exercise.name}</span>
+                    <span className="text-sm text-gray-400">
+                      {exercise.sets.length} sets
+                      {exercise.isCompleted && 
+                        <span className="ml-2 text-green-500">✓</span>
+                      }
+                    </span>
+                  </div>
+                  <div className="mt-2 text-sm text-gray-400">
+                    {exercise.sets.filter(set => set.isCompleted).length} / {exercise.sets.length} sets completed
+                  </div>
                 </div>
-                <div className="mt-2 text-sm text-gray-400">
-                  {exercise.sets.filter(set => set.isCompleted).length} / {exercise.sets.length} sets completed
-                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-gray-400">
+                {!activeWorkout ? "No workout selected" : 
+                !activeWorkout.exercises ? "No exercises found in this workout" :
+                "This workout has no exercises"}
               </div>
-            ))}
+            )}
           </div>
 
           {/* Footer with complete button */}
@@ -440,11 +252,11 @@ const WorkoutView = () => {
 };
 
 // Wrapper for ExerciseView that tracks changes
-const ExerciseViewWrapper = ({ exercise, onDataChange, onClose, onBack, compareWithOriginal }) => {
-  const [currentSets, setCurrentSets] = useState(exercise.sets || []);
+const ExerciseViewWrapper = ({ exercise, onDataChange, onClose, onBack, onViewHistory, compareWithOriginal }) => {
+  const [currentSets, setCurrentSets] = React.useState(exercise.sets || []);
   
   // Track changes to sets
-  useEffect(() => {
+  React.useEffect(() => {
     const hasChanged = compareData(compareWithOriginal?.sets, currentSets);
     onDataChange(hasChanged);
   }, [currentSets, compareWithOriginal, onDataChange]);
@@ -510,7 +322,9 @@ const ExerciseViewWrapper = ({ exercise, onDataChange, onClose, onBack, compareW
           <h3 className="text-xl font-bold">{exercise.name}</h3>
         </div>
         <div className="flex gap-2">
-          <button className="text-gray-400 hover:text-white">
+          <button 
+            onClick={onViewHistory}
+            className="text-gray-400 hover:text-white">
             <Info className="w-5 h-5" />
           </button>
         </div>
@@ -553,6 +367,20 @@ const ExerciseViewWrapper = ({ exercise, onDataChange, onClose, onBack, compareW
       </div>
     </div>
   );
+};
+
+// Helper function for WorkoutView to access
+const getWorkoutByIndices = (program, weekIndex, workoutIndex) => {
+  if (!program || !program.weeks || weekIndex === null || workoutIndex === null) {
+    return null;
+  }
+  
+  const week = program.weeks[weekIndex];
+  if (!week || !week.workouts) {
+    return null;
+  }
+  
+  return week.workouts[workoutIndex] || null;
 };
 
 export default WorkoutView;
